@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +12,6 @@ namespace Mots_glissés
 
         private int joueurCourant;
 
-        // Gestion du temps
         private TimeSpan tempsTotal;
         private TimeSpan tempsParTour;
 
@@ -23,7 +21,6 @@ namespace Mots_glissés
             plateau = p;
             dictionnaire = d;
             joueurs = j;
-
             joueurCourant = 0;
 
             tempsTotal = TimeSpan.FromMinutes(tempsTotalMinutes);
@@ -35,9 +32,6 @@ namespace Mots_glissés
         // ==========================
         public void Lancer()
         {
-            Console.Clear();
-            Console.WriteLine("=== DÉBUT DE LA PARTIE ===");
-
             Stopwatch chronoPartie = Stopwatch.StartNew();
 
             while (!FinDePartie(chronoPartie))
@@ -45,6 +39,7 @@ namespace Mots_glissés
                 Joueur j = joueurs[joueurCourant];
                 TourDeJeu(j);
 
+                // joueur suivant QUOI QU’IL ARRIVE
                 joueurCourant = (joueurCourant + 1) % joueurs.Count;
             }
 
@@ -63,46 +58,51 @@ namespace Mots_glissés
 
             Stopwatch chronoTour = Stopwatch.StartNew();
 
+            Console.WriteLine($"Temps restant : {tempsParTour.Seconds} secondes");
+            Console.Write("Propose un mot (ENTER pour passer) : ");
+
             while (chronoTour.Elapsed < tempsParTour)
             {
-                Console.Write("Propose un mot (ENTER pour passer) : ");
+                if (!Console.KeyAvailable)
+                    continue;
+
                 string mot = Console.ReadLine();
 
+                // ➜ Passe volontairement
                 if (string.IsNullOrEmpty(mot))
                     return;
 
                 mot = mot.Trim().ToUpper();
 
+                //  ERREUR → joueur suivant
                 if (mot.Length < 2)
                 {
-                    Console.WriteLine("Mot trop court.");
-                    continue;
+                    MessageErreur();
+                    return;
                 }
 
                 if (joueur.Contient(mot))
                 {
-                    Console.WriteLine("Mot déjà trouvé.");
-                    continue;
+                    MessageErreur();
+                    return;
                 }
 
                 if (!dictionnaire.RechercheDicho(mot))
                 {
-                    Console.WriteLine("Mot absent du dictionnaire.");
-                    continue;
+                    MessageErreur();
+                    return;
                 }
 
-                // 🔹 NOUVELLE LOGIQUE AVEC ResultatMot
                 object res = plateau.Recherche_Mot(mot);
                 if (res == null)
                 {
-                    Console.WriteLine("Mot non présent sur le plateau.");
-                    continue;
+                    MessageErreur();
+                    return;
                 }
 
-                // ✅ Mot valide
+                //  MOT VALIDE
                 joueur.AddMot(mot);
-
-                int score = CalculerScore(mot);
+                int score = mot.Length * mot.Length;
                 joueur.AddScore(score);
 
                 plateau.Maj_Plateau(res);
@@ -111,6 +111,10 @@ namespace Mots_glissés
                 Console.ReadKey();
                 return;
             }
+
+            //  Temps écoulé
+            Console.WriteLine("Temps écoulé !");
+            Console.ReadKey();
         }
 
         // ==========================
@@ -121,16 +125,9 @@ namespace Mots_glissés
             if (chrono.Elapsed >= tempsTotal)
                 return true;
 
-            // Fin si plateau vide (plus aucune lettre)
-            if (PlateauVide())
-                return true;
-
-            return false;
+            return PlateauVide();
         }
 
-        // ==========================
-        // TEST PLATEAU VIDE
-        // ==========================
         private bool PlateauVide()
         {
             string[,] g = plateau.Lettres;
@@ -143,22 +140,10 @@ namespace Mots_glissés
             return true;
         }
 
-        // ==========================
-        // SCORE
-        // ==========================
-        private int CalculerScore(string mot)
-        {
-            // Simple, clair, défendable
-            return mot.Length * mot.Length;
-        }
-
-        // ==========================
-        // AFFICHAGE FINAL
-        // ==========================
         private void AfficherResultats()
         {
             Console.Clear();
-            Console.WriteLine("=== FIN DE LA PARTIE ===\n");
+            Console.WriteLine("=== FIN DE PARTIE ===\n");
 
             foreach (Joueur j in joueurs)
             {
@@ -166,5 +151,13 @@ namespace Mots_glissés
                 Console.WriteLine();
             }
         }
+
+        private void MessageErreur()
+        {
+            Console.WriteLine("Mot incorrect → joueur suivant");
+            Console.ReadKey();
+        }
     }
 }
+
+
