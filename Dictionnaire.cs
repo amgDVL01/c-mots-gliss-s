@@ -39,35 +39,47 @@ namespace Mots_glissés
             Tri_Fusion();
         }
         public List<string> Dico { get { return this.dico; } }
-        public void Tri_Fusion()
+               public List<string> Tri_Fusion(List<string> liste)
         {
-           Tri_Fusion(0, dico.Count - 1);
-        }
-        public void Tri_Fusion(int gauche, int droite)
-        {
-            if (gauche < droite)
-            {
-                int pivot = Partition(gauche, droite);
-                Tri_Fusion(gauche, pivot - 1);
-                Tri_Fusion(pivot + 1, droite);
-            }
-        }
-        public int Partition(int gauche, int droite)
-        {
-            string pivot = dico[droite];
-            int i = gauche - 1;
+            if (liste.Count <= 1)
+                return liste;
 
-            for (int j = gauche; j < droite; j++)
+            int milieu = liste.Count / 2;
+
+            List<string> gauche = liste.GetRange(0, milieu);
+            List<string> droite = liste.GetRange(milieu, liste.Count - milieu);
+
+            gauche = Tri_Fusion(gauche);
+            droite = Tri_Fusion(droite);
+
+            return Fusion(gauche, droite);
+        }
+        public List<string> Fusion(List<string> gauche, List<string> droite)
+        {
+            List<string> resultat = new List<string>();
+            int i = 0, j = 0;
+
+            while (i < gauche.Count && j < droite.Count)
             {
-                if (ComparerMots(dico[j], pivot) < 0)
+                if (ComparerMots(gauche[i], droite[j]) <= 0)
                 {
+                    resultat.Add(gauche[i]);
                     i++;
-                    (dico[i], dico[j]) = (dico[j], dico[i]);
+                }
+                else
+                {
+                    resultat.Add(droite[j]);
+                    j++;
                 }
             }
 
-            (dico[i + 1], dico[droite]) = (dico[droite], dico[i + 1]);
-            return i + 1;
+            while (i < gauche.Count)
+                resultat.Add(gauche[i++]);
+
+            while (j < droite.Count)
+                resultat.Add(droite[j++]);
+
+            return resultat;
         }
         public bool RechercheDicho(string mot)
         {
@@ -110,3 +122,4 @@ namespace Mots_glissés
         }
     }
 }
+
