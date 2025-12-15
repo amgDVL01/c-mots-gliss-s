@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Mots_glissés
 {
@@ -15,9 +16,13 @@ namespace Mots_glissés
             Dictionnaire dictionnaire = new Dictionnaire();
 
             // ==========================
-            // Plateau aléatoire (exigé par le sujet)
+            // Création du plateau aléatoire
             // ==========================
-            Plateau plateau = new Plateau(8, 8);
+            int lignes = 8;
+            int colonnes = 8;
+            string[,] grille = CreerGrilleAleatoire(lignes, colonnes);
+
+            Plateau plateau = new Plateau(grille);
 
             // ==========================
             // Joueurs
@@ -28,30 +33,50 @@ namespace Mots_glissés
             Console.Write("Nom du joueur 2 : ");
             Joueur joueur2 = new Joueur(Console.ReadLine());
 
-            List<Joueur> joueurs = new List<Joueur>
-            {
-                joueur1,
-                joueur2
-            };
+            List<Joueur> joueurs = new List<Joueur> { joueur1, joueur2 };
 
             // ==========================
             // Jeu
             // ==========================
-            Jeu jeu = new Jeu(
-                plateau,
-                dictionnaire,
-                joueurs,
-                3,    // durée totale en minutes
-                30    // durée d'un tour en secondes
-            );
-
-            // ==========================
-            // Lancement
-            // ==========================
+            Jeu jeu = new Jeu(plateau, dictionnaire, joueurs, 3, 30);
             jeu.Lancer();
 
-            Console.WriteLine("Appuyez sur une touche pour quitter...");
             Console.ReadKey();
+        }
+
+        // ==========================
+        // Génération aléatoire depuis Lettres.txt
+        // ==========================
+        static string[,] CreerGrilleAleatoire(int lignes, int colonnes)
+        {
+            List<string> sac = new List<string>();
+            string[] data = File.ReadAllLines("Lettres.txt");
+
+            foreach (string ligne in data)
+            {
+                // Format : A,10,0
+                string[] parts = ligne.Split(',');
+                string lettre = parts[0];
+                int nb = int.Parse(parts[1]);
+
+                for (int i = 0; i < nb; i++)
+                    sac.Add(lettre);
+            }
+
+            Random rnd = new Random();
+            string[,] grille = new string[lignes, colonnes];
+
+            for (int i = 0; i < lignes; i++)
+            {
+                for (int j = 0; j < colonnes; j++)
+                {
+                    int idx = rnd.Next(sac.Count);
+                    grille[i, j] = sac[idx];
+                    sac.RemoveAt(idx);
+                }
+            }
+
+            return grille;
         }
     }
 }
