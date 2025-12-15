@@ -1,20 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace Mots_glissés
 {
     internal class Plateau
     {
         private string[,] lettres;
 
-        // Constructeur avec plateau existant
+        // ==========================
+        // CONSTRUCTEURS
+        // ==========================
+
+        // Plateau fourni (tests, fichiers)
         public Plateau(string[,] l)
         {
-            this.lettres = l;
+            lettres = l;
         }
 
-        // Constructeur vide (utile pour tests)
+        // Plateau vide (tests)
         public Plateau()
         {
         }
 
+        // ✅ Plateau aléatoire (OBLIGATOIRE SELON LE SUJET)
+        public Plateau(int lignes, int colonnes)
+        {
+            lettres = new string[lignes, colonnes];
+            GenererPlateauAleatoire();
+        }
+
+        // ==========================
+        // PROPRIÉTÉS
+        // ==========================
         public string[,] Lettres
         {
             get { return lettres; }
@@ -31,7 +49,41 @@ namespace Mots_glissés
         }
 
         // ==========================
-        // AFFICHAGE DU PLATEAU
+        // GÉNÉRATION ALÉATOIRE
+        // ==========================
+        private void GenererPlateauAleatoire()
+        {
+            List<string> sac = new List<string>();
+
+            // Lecture du fichier Lettres.txt
+            // Format : A,10,1
+            string[] lignes = File.ReadAllLines("Lettres.txt");
+
+            foreach (string ligne in lignes)
+            {
+                string[] parts = ligne.Split(',');
+                string lettre = parts[0];
+                int maxOcc = int.Parse(parts[1]);
+
+                for (int i = 0; i < maxOcc; i++)
+                    sac.Add(lettre);
+            }
+
+            Random rnd = new Random();
+
+            for (int i = 0; i < NbLignes; i++)
+            {
+                for (int j = 0; j < NbColonnes; j++)
+                {
+                    int index = rnd.Next(sac.Count);
+                    lettres[i, j] = sac[index];
+                    sac.RemoveAt(index);
+                }
+            }
+        }
+
+        // ==========================
+        // AFFICHAGE
         // ==========================
         public override string ToString()
         {
@@ -90,7 +142,7 @@ namespace Mots_glissés
             if (lettres[i, j] != mot[index].ToString())
                 return false;
 
-            // Haut
+            // Vertical (haut)
             if (RechercheRec(i - 1, j, mot, index + 1))
                 return true;
 
@@ -116,9 +168,7 @@ namespace Mots_glissés
                 for (int j = 0; j < NbColonnes; j++)
                 {
                     if (!string.IsNullOrEmpty(lettres[i, j]) && mot.Contains(lettres[i, j]))
-                    {
                         lettres[i, j] = "";
-                    }
                 }
             }
 
@@ -150,5 +200,3 @@ namespace Mots_glissés
         }
     }
 }
-
-
