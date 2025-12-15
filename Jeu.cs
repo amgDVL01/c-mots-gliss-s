@@ -71,7 +71,7 @@ namespace Mots_glissés
                 if (string.IsNullOrEmpty(mot))
                     return;
 
-                mot = mot.ToUpper();
+                mot = mot.Trim().ToUpper();
 
                 if (mot.Length < 2)
                 {
@@ -91,19 +91,21 @@ namespace Mots_glissés
                     continue;
                 }
 
-                if (!plateau.Recherche_Mot(mot))
+                // 🔹 NOUVELLE LOGIQUE AVEC ResultatMot
+                object res = plateau.Recherche_Mot(mot);
+                if (res == null)
                 {
                     Console.WriteLine("Mot non présent sur le plateau.");
                     continue;
                 }
 
-                // Mot valide
+                // ✅ Mot valide
                 joueur.AddMot(mot);
 
                 int score = CalculerScore(mot);
                 joueur.AddScore(score);
 
-                plateau.AppliquerGlissement(mot);
+                plateau.Maj_Plateau(res);
 
                 Console.WriteLine($"Mot accepté ! +{score} points");
                 Console.ReadKey();
@@ -119,10 +121,26 @@ namespace Mots_glissés
             if (chrono.Elapsed >= tempsTotal)
                 return true;
 
-            if (plateau.EstVide())
+            // Fin si plateau vide (plus aucune lettre)
+            if (PlateauVide())
                 return true;
 
             return false;
+        }
+
+        // ==========================
+        // TEST PLATEAU VIDE
+        // ==========================
+        private bool PlateauVide()
+        {
+            string[,] g = plateau.Lettres;
+
+            for (int i = 0; i < g.GetLength(0); i++)
+                for (int j = 0; j < g.GetLength(1); j++)
+                    if (g[i, j] != " " && g[i, j] != "")
+                        return false;
+
+            return true;
         }
 
         // ==========================
@@ -130,7 +148,7 @@ namespace Mots_glissés
         // ==========================
         private int CalculerScore(string mot)
         {
-            // Formellement explicable à l’oral
+            // Simple, clair, défendable
             return mot.Length * mot.Length;
         }
 
@@ -150,4 +168,3 @@ namespace Mots_glissés
         }
     }
 }
-
