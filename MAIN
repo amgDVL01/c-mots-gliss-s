@@ -1,0 +1,57 @@
+using System;
+using System.Collections.Generic;
+
+namespace Mots_glissés
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            // ==========================
+            // Dictionnaire
+            // ==========================
+            Dictionnaire dictionnaire = new Dictionnaire();
+
+            // ==========================
+            // Plateau aléatoire (exigé par le sujet)
+            // ==========================
+            Plateau plateau = new Plateau(8, 8);
+
+            // ==========================
+            // Joueurs
+            // ==========================
+            Console.Write("Nom du joueur 1 : ");
+            Joueur joueur1 = new Joueur(Console.ReadLine());
+
+            Console.Write("Nom du joueur 2 : ");
+            Joueur joueur2 = new Joueur(Console.ReadLine());
+
+            List<Joueur> joueurs = new List<Joueur>
+            {
+                joueur1,
+                joueur2
+            };
+
+            // ==========================
+            // Jeu
+            // ==========================
+            Jeu jeu = new Jeu(
+                plateau,
+                dictionnaire,
+                joueurs,
+                3,    // durée totale en minutes
+                30    // durée d'un tour en secondes
+            );
+
+            // ==========================
+            // Lancement
+            // ==========================
+            jeu.Lancer();
+
+            Console.WriteLine("Appuyez sur une touche pour quitter...");
+            Console.ReadKey();
+        }
+    }
+}
