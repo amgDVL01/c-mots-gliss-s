@@ -4,199 +4,141 @@ using System.IO;
 
 namespace Mots_glissés
 {
-    internal class Plateau
-    {
-        private string[,] lettres;
+     internal class Plateau
+ {
+     private string[,] lettres;
+     private int lignes;
+     private int colonnes;
 
-        // ==========================
-        // CONSTRUCTEURS
-        // ==========================
+     /// <summary>
+     /// Constructeur
+     /// </summary>
+     /// <param name="grille"></param>
+     public Plateau(string[,] grille)
+     {
+         lettres = grille;
+         lignes = grille.GetLength(0);
+         colonnes = grille.GetLength(1);
+     }
 
-        // Plateau fourni (tests, fichiers)
-        public Plateau(string[,] l)
-        {
-            lettres = l;
-        }
+     /// <summary>
+     /// Accesseur
+     /// </summary>
+     public string[,] Lettres
+     {
+         get { return lettres; }
+     }
 
-        // Plateau vide (tests)
-        public Plateau()
-        {
-        }
+     
+     /// <summary>
+     /// Méthode ToString() d'affichage du plateau
+     /// </summary>
+     /// <returns></returns>
+     
+     public override string ToString()
+     {
+         string res = "";
+         for (int i = 0; i < lignes; i++)
+         {
+             for (int j = 0; j < colonnes; j++)
+             {
+                 res += lettres[i, j] + " ";
+             }
+             res += "\n";
+         }
+         return res;
+     }
 
-        // ✅ Plateau aléatoire (OBLIGATOIRE SELON LE SUJET)
-        public Plateau(int lignes, int colonnes)
-        {
-            lettres = new string[lignes, colonnes];
-            GenererPlateauAleatoire();
-        }
+     /// <summary>
+     /// Sauvegarde SIMPLE (pas de contrôle)
+     /// </summary>
+     /// <param name="nomFile"></param>
+     public void ToFile(string nomFile)
+     {
+         System.IO.StreamWriter sw = new System.IO.StreamWriter(nomFile);
 
-        // ==========================
-        // PROPRIÉTÉS
-        // ==========================
-        public string[,] Lettres
-        {
-            get { return lettres; }
-        }
+         for (int i = 0; i < lignes; i++)
+         {
+             for (int j = 0; j < colonnes; j++)
+             {
+                 sw.Write(lettres[i, j]);
+                 if (j < colonnes - 1)
+                     sw.Write(";");
+             }
+             sw.WriteLine();
+         }
 
-        public int NbLignes
-        {
-            get { return lettres.GetLength(0); }
-        }
+         sw.Close();
+     }
 
-        public int NbColonnes
-        {
-            get { return lettres.GetLength(1); }
-        }
+     /// <summary>
+     /// Lecture SIMPLE
+     /// </summary>
+     /// <param name="grille"></param>
+     public void ToRead(string[,] grille)
+     {
+         lettres = grille;
+         lignes = grille.GetLength(0);
+         colonnes = grille.GetLength(1);
+     }
 
-        // ==========================
-        // GÉNÉRATION ALÉATOIRE
-        // ==========================
-        private void GenererPlateauAleatoire()
-        {
-            List<string> sac = new List<string>();
+     /// <summary>
+     /// Recherche d’un mot (vertical uniquement, depuis le bas)
+     /// </summary>
+     /// <param name="mot"></param>
+     /// <returns></returns>
+     public object Recherche_Mot(string mot)
+     {
+         mot = mot.ToUpper();
 
-            // Lecture du fichier Lettres.txt
-            // Format : A,10,1
-            string[] lignes = File.ReadAllLines("Lettres.txt");
+         for (int col = 0; col < colonnes; col++)
+         {
+             int indexMot = 0;
 
-            foreach (string ligne in lignes)
-            {
-                string[] parts = ligne.Split(',');
-                string lettre = parts[0];
-                int maxOcc = int.Parse(parts[1]);
+             for (int lig = lignes - 1; lig >= 0; lig--)
+             {
+                 if (lettres[lig, col] == mot[indexMot].ToString())
+                 {
+                     indexMot++;
 
-                for (int i = 0; i < maxOcc; i++)
-                    sac.Add(lettre);
-            }
+                     if (indexMot == mot.Length)
+                     {
+                         // Mot trouvé → on retourne la colonne
+                         return col;
+                     }
+                 }
+                 else
+                 {
+                     indexMot = 0;
+                 }
+             }
+         }
 
-            Random rnd = new Random();
+         return null; /// mot non trouvé
+     }
 
-            for (int i = 0; i < NbLignes; i++)
-            {
-                for (int j = 0; j < NbColonnes; j++)
-                {
-                    int index = rnd.Next(sac.Count);
-                    lettres[i, j] = sac[index];
-                    sac.RemoveAt(index);
-                }
-            }
-        }
+     /// <summary>
+     /// Mise à jour du plateau (efface une colonne trouvée)
+     /// </summary>
+     /// <param name="resultat"></param>
+     public void Maj_Plateau(object resultat)
+     {
+         if (resultat == null)
+             return;
 
-        // ==========================
-        // AFFICHAGE
-        // ==========================
-        public override string ToString()
-        {
-            string s = "";
+         int col = (int)resultat;
 
-            for (int i = 0; i < NbLignes; i++)
-            {
-                for (int j = 0; j < NbColonnes; j++)
-                {
-                    s += (string.IsNullOrEmpty(lettres[i, j]) ? "." : lettres[i, j]) + " ";
-                }
-                s += "\n";
-            }
-            return s;
-        }
+         /// Décalage vers le bas
+         for (int i = lignes - 1; i > 0; i--)
+         {
+             lettres[i, col] = lettres[i - 1, col];
+         }
 
-        // ==========================
-        // FIN DE PARTIE
-        // ==========================
-        public bool EstVide()
-        {
-            for (int i = 0; i < NbLignes; i++)
-                for (int j = 0; j < NbColonnes; j++)
-                    if (!string.IsNullOrEmpty(lettres[i, j]))
-                        return false;
-
-            return true;
-        }
-
-        // ==========================
-        // RECHERCHE DU MOT
-        // ==========================
-        public bool Recherche_Mot(string mot)
-        {
-            int ligneBase = NbLignes - 1;
-
-            for (int j = 0; j < NbColonnes; j++)
-            {
-                if (lettres[ligneBase, j] == mot[0].ToString())
-                {
-                    if (RechercheRec(ligneBase, j, mot, 0))
-                        return true;
-                }
-            }
-            return false;
-        }
-
-        private bool RechercheRec(int i, int j, string mot, int index)
-        {
-            if (index == mot.Length)
-                return true;
-
-            if (i < 0 || j < 0 || j >= NbColonnes)
-                return false;
-
-            if (lettres[i, j] != mot[index].ToString())
-                return false;
-
-            // Vertical (haut)
-            if (RechercheRec(i - 1, j, mot, index + 1))
-                return true;
-
-            // Gauche
-            if (RechercheRec(i, j - 1, mot, index + 1))
-                return true;
-
-            // Droite
-            if (RechercheRec(i, j + 1, mot, index + 1))
-                return true;
-
-            return false;
-        }
-
-        // ==========================
-        // GLISSEMENT DES LETTRES
-        // ==========================
-        public void AppliquerGlissement(string mot)
-        {
-            // Suppression des lettres du mot
-            for (int i = 0; i < NbLignes; i++)
-            {
-                for (int j = 0; j < NbColonnes; j++)
-                {
-                    if (!string.IsNullOrEmpty(lettres[i, j]) && mot.Contains(lettres[i, j]))
-                        lettres[i, j] = "";
-                }
-            }
-
-            // Glissement colonne par colonne
-            for (int j = 0; j < NbColonnes; j++)
-            {
-                List<string> colonne = new List<string>();
-
-                for (int i = 0; i < NbLignes; i++)
-                {
-                    if (!string.IsNullOrEmpty(lettres[i, j]))
-                        colonne.Add(lettres[i, j]);
-                }
-
-                int index = NbLignes - 1;
-
-                for (int k = colonne.Count - 1; k >= 0; k--)
-                {
-                    lettres[index, j] = colonne[k];
-                    index--;
-                }
-
-                while (index >= 0)
-                {
-                    lettres[index, j] = "";
-                    index--;
-                }
-            }
-        }
-    }
+         /// Case du haut vide
+         lettres[0, col] = " ";
+     }
+ }
+    
+    
 }
+
