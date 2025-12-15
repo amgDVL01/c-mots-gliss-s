@@ -1,4 +1,8 @@
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace Mots_glissés
 {
     internal class Jeu
@@ -93,7 +97,7 @@ namespace Mots_glissés
                     continue;
                 }
 
-                // ✅ Mot valide
+                // Mot valide
                 joueur.AddMot(mot);
 
                 int score = CalculerScore(mot);
@@ -146,5 +150,4 @@ namespace Mots_glissés
         }
     }
 }
-
 
