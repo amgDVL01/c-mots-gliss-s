@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Mots_glissés
 {
-    internal class Joueur //validé
+    internal class Joueur
     {
         string nom;
         int score;
