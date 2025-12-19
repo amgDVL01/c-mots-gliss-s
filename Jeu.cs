@@ -51,71 +51,72 @@ namespace Mots_glissés
         // TOUR D’UN JOUEUR
         // ==========================
         private void TourDeJeu(Joueur joueur)
+    {
+    Console.Clear();
+    Console.WriteLine(plateau.ToString());
+    Console.WriteLine($"Tour de {joueur.Nom}");
+    Console.WriteLine($"Temps : {tempsParTour.Seconds} secondes");
+    Console.WriteLine("Propose un mot puis ENTER (ou attendre pour passer)");
+
+    Stopwatch chronoTour = Stopwatch.StartNew();
+    string mot = "";
+
+    while (chronoTour.Elapsed < tempsParTour)
+    {
+        if (Console.KeyAvailable)
         {
-            Console.Clear();
-            Console.WriteLine(plateau.ToString());
-            Console.WriteLine($"Tour de {joueur.Nom}");
+            ConsoleKeyInfo key = Console.ReadKey(true);
 
-            Stopwatch chronoTour = Stopwatch.StartNew();
-
-            Console.WriteLine($"Temps restant : {tempsParTour.Seconds} secondes");
-            Console.Write("Propose un mot (ENTER pour passer) : ");
-
-            while (chronoTour.Elapsed < tempsParTour)
+            // Validation par ENTER
+            if (key.Key == ConsoleKey.Enter)
             {
-                if (!Console.KeyAvailable)
-                    continue;
-
-                string mot = Console.ReadLine();
-
-                // ➜ Passe volontairement
                 if (string.IsNullOrEmpty(mot))
-                    return;
-
+                    return; 
                 mot = mot.Trim().ToUpper();
 
-                //  ERREUR → joueur suivant
-                if (mot.Length < 2)
+                if (mot.Length < 2 ||
+                    joueur.Contient(mot) ||
+                    !dictionnaire.RechercheDicho(mot))
                 {
-                    MessageErreur();
-                    return;
-                }
-
-                if (joueur.Contient(mot))
-                {
-                    MessageErreur();
-                    return;
-                }
-
-                if (!dictionnaire.RechercheDicho(mot))
-                {
-                    MessageErreur();
+                    Console.WriteLine("Mot invalide → joueur suivant");
+                    Console.ReadKey();
                     return;
                 }
 
                 object res = plateau.Recherche_Mot(mot);
                 if (res == null)
                 {
-                    MessageErreur();
+                    Console.WriteLine("Mot non présent sur le plateau");
+                    Console.ReadKey();
                     return;
                 }
 
-                //  MOT VALIDE
                 joueur.AddMot(mot);
-                int score = mot.Length * mot.Length;
+                int score = CalculerScore(mot);
                 joueur.AddScore(score);
-
                 plateau.Maj_Plateau(res);
 
                 Console.WriteLine($"Mot accepté ! +{score} points");
                 Console.ReadKey();
                 return;
             }
-
-            //  Temps écoulé
-            Console.WriteLine("Temps écoulé !");
-            Console.ReadKey();
+            else if (key.Key == ConsoleKey.Backspace && mot.Length > 0)
+            {
+                mot = mot.Substring(0, mot.Length - 1);
+                Console.Write("\b \b");
+            }
+            else if (char.IsLetter(key.KeyChar))
+            {
+                mot += char.ToUpper(key.KeyChar);
+                Console.Write(key.KeyChar);
+            }
         }
+    }
+
+    // ⏱ Temps écoulé
+    Console.WriteLine("\nTemps écoulé → joueur suivant");
+    Console.ReadKey();
+}
 
         // ==========================
         // FIN DE PARTIE
@@ -159,5 +160,6 @@ namespace Mots_glissés
         }
     }
 }
+
 
 
