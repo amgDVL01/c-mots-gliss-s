@@ -6,15 +6,20 @@ namespace Mots_glissés
 {
     internal class Jeu
     {
+        
+        //Attributs
         private Plateau plateau;
         private Dictionnaire dictionnaire;
         private List<Joueur> joueurs;
 
+        // joueur en jeu
         private int joueurCourant;
 
         private TimeSpan tempsTotal;
         private TimeSpan tempsParTour;
 
+        
+        // Constructeur Jeu : prépare la partie
         public Jeu(Plateau p, Dictionnaire d, List<Joueur> j,
                    int tempsTotalMinutes = 2, int tempsTourSecondes = 30)
         {
@@ -27,9 +32,7 @@ namespace Mots_glissés
             tempsParTour = TimeSpan.FromSeconds(tempsTourSecondes);
         }
 
-        // ==========================
-        // LANCEMENT DU JEU
-        // ==========================
+  
         public void Lancer()
         {
             Stopwatch chronoPartie = Stopwatch.StartNew();
@@ -39,7 +42,6 @@ namespace Mots_glissés
                 Joueur j = joueurs[joueurCourant];
                 TourDeJeu(j);
 
-                // joueur suivant QUOI QU’IL ARRIVE
                 joueurCourant = (joueurCourant + 1) % joueurs.Count;
             }
 
@@ -47,9 +49,7 @@ namespace Mots_glissés
             AfficherResultats();
         }
 
-        // ==========================
-        // TOUR D’UN JOUEUR
-        // ==========================
+
        private void TourDeJeu(Joueur joueur)
 {
     Console.Clear();
@@ -62,7 +62,6 @@ namespace Mots_glissés
 
     while (true)
     {
-        // ⏱ Temps écoulé → zappe DIRECTEMENT
         if (chronoTour.Elapsed >= tempsParTour)
         {
             Console.WriteLine("\nTemps écoulé !");
@@ -70,12 +69,10 @@ namespace Mots_glissés
             return;
         }
 
-        // Lecture NON BLOQUANTE
         if (Console.KeyAvailable)
         {
             ConsoleKeyInfo key = Console.ReadKey(true);
 
-            // ENTER → valider le mot
             if (key.Key == ConsoleKey.Enter)
                 break;
 
@@ -138,9 +135,7 @@ namespace Mots_glissés
     Console.ReadKey();
 }
 
-        // ==========================
-        // FIN DE PARTIE
-        // ==========================
+
         private bool FinDePartie(Stopwatch chrono)
         {
             if (chrono.Elapsed >= tempsTotal)
@@ -180,6 +175,7 @@ namespace Mots_glissés
         }
     }
 }
+
 
 
 
