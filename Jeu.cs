@@ -50,61 +50,42 @@ namespace Mots_glissés
         // ==========================
         // TOUR D’UN JOUEUR
         // ==========================
-        private void TourDeJeu(Joueur joueur)
-    {
+       private void TourDeJeu(Joueur joueur)
+{
     Console.Clear();
     Console.WriteLine(plateau.ToString());
     Console.WriteLine($"Tour de {joueur.Nom}");
-    Console.WriteLine($"Temps : {tempsParTour.Seconds} secondes");
-    Console.WriteLine("Propose un mot puis ENTER (ou attendre pour passer)");
+    Console.WriteLine($"Temps restant : {tempsParTour.TotalSeconds} secondes");
 
     Stopwatch chronoTour = Stopwatch.StartNew();
     string mot = "";
 
-    while (chronoTour.Elapsed < tempsParTour)
+    while (true)
     {
+        // ⏱ Temps écoulé → zappe DIRECTEMENT
+        if (chronoTour.Elapsed >= tempsParTour)
+        {
+            Console.WriteLine("\nTemps écoulé !");
+            Thread.Sleep(1000);
+            return;
+        }
+
+        // Lecture NON BLOQUANTE
         if (Console.KeyAvailable)
         {
             ConsoleKeyInfo key = Console.ReadKey(true);
 
-            // Validation par ENTER
+            // ENTER → valider le mot
             if (key.Key == ConsoleKey.Enter)
-            {
-                if (string.IsNullOrEmpty(mot))
-                    return; 
-                mot = mot.Trim().ToUpper();
+                break;
 
-                if (mot.Length < 2 ||
-                    joueur.Contient(mot) ||
-                    !dictionnaire.RechercheDicho(mot))
-                {
-                    Console.WriteLine("Mot invalide → joueur suivant");
-                    Console.ReadKey();
-                    return;
-                }
-
-                object res = plateau.Recherche_Mot(mot);
-                if (res == null)
-                {
-                    Console.WriteLine("Mot non présent sur le plateau");
-                    Console.ReadKey();
-                    return;
-                }
-
-                joueur.AddMot(mot);
-                int score = CalculerScore(mot);
-                joueur.AddScore(score);
-                plateau.Maj_Plateau(res);
-
-                Console.WriteLine($"Mot accepté ! +{score} points");
-                Console.ReadKey();
-                return;
-            }
-            else if (key.Key == ConsoleKey.Backspace && mot.Length > 0)
+            // BACKSPACE
+            if (key.Key == ConsoleKey.Backspace && mot.Length > 0)
             {
                 mot = mot.Substring(0, mot.Length - 1);
                 Console.Write("\b \b");
             }
+            // Lettre
             else if (char.IsLetter(key.KeyChar))
             {
                 mot += char.ToUpper(key.KeyChar);
@@ -113,8 +94,47 @@ namespace Mots_glissés
         }
     }
 
-    // ⏱ Temps écoulé
-    Console.WriteLine("\nTemps écoulé → joueur suivant");
+    Console.WriteLine();
+
+    if (string.IsNullOrEmpty(mot))
+        return;
+
+    if (mot.Length < 2)
+    {
+        Console.WriteLine("Mot trop court.");
+        Thread.Sleep(1000);
+        return;
+    }
+
+    if (joueur.Contient(mot))
+    {
+        Console.WriteLine("Mot déjà trouvé.");
+        Thread.Sleep(1000);
+        return;
+    }
+
+    if (!dictionnaire.RechercheDicho(mot))
+    {
+        Console.WriteLine("Mot absent du dictionnaire.");
+        Thread.Sleep(1000);
+        return;
+    }
+
+    object res = plateau.Recherche_Mot(mot);
+    if (res == null)
+    {
+        Console.WriteLine("Mot non présent sur le plateau.");
+        Thread.Sleep(1000);
+        return;
+    }
+
+
+    joueur.AddMot(mot);
+    int score = CalculerScore(mot);
+    joueur.AddScore(score);
+    plateau.Maj_Plateau(res);
+
+    Console.WriteLine($"Mot accepté ! +{score} points");
     Console.ReadKey();
 }
 
@@ -160,6 +180,7 @@ namespace Mots_glissés
         }
     }
 }
+
 
 
 
