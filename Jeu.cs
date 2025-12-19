@@ -28,9 +28,7 @@ namespace Mots_glissés
             tempsParTour = TimeSpan.FromSeconds(tempsTourSecondes);
         }
 
-        // ==========================
-        // LANCEMENT DU JEU
-        // ==========================
+
         public void Lancer()
         {
             Console.Clear();
@@ -50,9 +48,7 @@ namespace Mots_glissés
             AfficherResultats();
         }
 
-        // ==========================
-        // TOUR D’UN JOUEUR
-        // ==========================
+
         private void TourDeJeu(Joueur joueur)
         {
             Console.Clear();
@@ -73,22 +69,20 @@ namespace Mots_glissés
                     return;
                 }
 
-                // Lecture non bloquante
                 if (Console.KeyAvailable)
                 {
                     ConsoleKeyInfo key = Console.ReadKey();
 
-                    // ENTER : valider le mot
+                    // enter validation du mot
                     if (key.Key == ConsoleKey.Enter)
                         break;
 
-                    // BACKSPACE : supprimer une lettre
+                    // supprimer une lettre
                     if (key.Key == ConsoleKey.Backspace && mot.Length > 0)
                     {
                         mot = mot.Substring(0, mot.Length - 1);
                         Console.Write("\b \b");
                     }
-                    // Lettre
                     else if (char.IsLetter(key.KeyChar))
                     {
                         mot += char.ToUpper(key.KeyChar);
@@ -142,9 +136,7 @@ namespace Mots_glissés
         }
 
 
-        // ==========================
-        // FIN DE PARTIE
-        // ==========================
+
         private bool FinDePartie(Stopwatch chrono)
         {
             if (chrono.Elapsed >= tempsTotal)
@@ -157,9 +149,7 @@ namespace Mots_glissés
             return false;
         }
 
-        // ==========================
-        // TEST PLATEAU VIDE
-        // ==========================
+
         private bool PlateauVide()
         {
             string[,] g = plateau.Lettres;
@@ -172,21 +162,17 @@ namespace Mots_glissés
             return true;
         }
 
-        // ==========================
-        // SCORE
-        // ==========================
+
         private int CalculerScore(string mot)
         {
             return mot.Length * mot.Length;
         }
 
-        // ==========================
-        // AFFICHAGE FINAL
-        // ==========================
+        // Affichage final
         private void AfficherResultats()
         {
             Console.Clear();
-            Console.WriteLine("=== FIN DE LA PARTIE ===\n");
+            Console.WriteLine("FIN DE LA PARTIE\n");
 
             foreach (Joueur j in joueurs)
             {
@@ -195,4 +181,5 @@ namespace Mots_glissés
             }
         }
     }
+
 }
