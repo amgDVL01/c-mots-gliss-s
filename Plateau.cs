@@ -46,7 +46,7 @@ namespace Mots_glissés
                     string lettre = parts[0];
                     int nbMax = int.Parse(parts[1]);
 
-                    /// ajout de chaque lettre (2xpoids) dans le sac de lettres
+                    /// ajout de chaque lettre (2xnombre) dans le sac de lettres
                     for (int i = 0; i < nbMax; i++)
                     {
                         sacDeLettres.Add(lettre);
@@ -297,3 +297,4 @@ namespace Mots_glissés
         }
     }
 }
+
